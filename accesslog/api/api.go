@@ -1,3 +1,3 @@
-package accesslog
+package api
 
 type AccessLog struct{}

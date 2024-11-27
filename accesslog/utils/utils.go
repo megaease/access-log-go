@@ -1,4 +1,4 @@
-package accesslog
+package utils
 
 import (
 	"crypto/tls"
@@ -8,7 +8,7 @@ import (
 )
 
 // LoadTLSConfig loads TLS configuration with tolerance for empty file path.
-func loadTLSConfig(caFile, certFile, keyFile string) (*tls.Config, error) {
+func LoadTLSConfig(caFile, certFile, keyFile string) (*tls.Config, error) {
 	if caFile == "" && (certFile == "" || keyFile == "") {
 		return nil, nil
 	}

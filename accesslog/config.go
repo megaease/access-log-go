@@ -1,15 +1,9 @@
 package accesslog
 
+import "megaease/access-log-go/accesslog/eventhub"
+
 type (
 	Config struct {
-		Kafka Kafka
-	}
-
-	Kafka struct {
-		KafkaAddresses []string
-		KafkaCertfile  string
-		KafkaKeyfile   string
-		KafkaUsername  string
-		KafkaPassword  string
+		Backend eventhub.Config
 	}
 )

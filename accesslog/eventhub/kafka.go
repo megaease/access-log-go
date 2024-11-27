@@ -1,8 +1,10 @@
-package accesslog
+package eventhub
 
 import (
 	"encoding/json"
 	"fmt"
+	"megaease/access-log-go/accesslog/api"
+	"megaease/access-log-go/accesslog/utils"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -14,25 +16,25 @@ const (
 )
 
 type (
-	eventHub struct {
+	eventHubKafka struct {
 		config        *Config
 		kafkaProducer sarama.SyncProducer
 
 		done        chan struct{}
-		accessLogCh chan *AccessLog
+		accessLogCh chan *api.AccessLog
 	}
 )
 
 // New creates a new EventHub.
-func newEventHub(config *Config) (*eventHub, error) {
+func newKafka(config *Config) (EventHub, error) {
 	conf := config.Kafka
-	tlsConfig, err := loadTLSConfig("", conf.KafkaCertfile, conf.KafkaKeyfile)
+	tlsConfig, err := utils.LoadTLSConfig("", conf.Certfile, conf.Keyfile)
 	if err != nil {
 		return nil, fmt.Errorf("load tls config failed: %v", err)
 	}
 
-	logrus.Infof("hub center address: %v", conf.KafkaAddresses)
-	logrus.Infof("cert files: %s, %s", conf.KafkaCertfile, conf.KafkaKeyfile)
+	logrus.Infof("hub center address: %v", conf.Addresses)
+	logrus.Infof("cert files: %s, %s", conf.Certfile, conf.Keyfile)
 
 	// Kafka producer configuration
 	kafkaConfig := sarama.NewConfig()
@@ -42,31 +44,31 @@ func newEventHub(config *Config) (*eventHub, error) {
 	kafkaConfig.Net.TLS.Enable = true
 	kafkaConfig.Net.TLS.Config = tlsConfig
 	kafkaConfig.Net.SASL.Enable = true
-	kafkaConfig.Net.SASL.User = conf.KafkaUsername
-	kafkaConfig.Net.SASL.Password = conf.KafkaPassword
+	kafkaConfig.Net.SASL.User = conf.Username
+	kafkaConfig.Net.SASL.Password = conf.Password
 	kafkaConfig.Net.SASL.Mechanism = sarama.SASLTypePlaintext
 
-	producer, err := sarama.NewSyncProducer(conf.KafkaAddresses, kafkaConfig)
+	producer, err := sarama.NewSyncProducer(conf.Addresses, kafkaConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Kafka producer: %v", err)
 	}
 
-	h := &eventHub{
+	h := &eventHubKafka{
 		config:        config,
 		kafkaProducer: producer,
 		done:          make(chan struct{}),
-		accessLogCh:   make(chan *AccessLog, 10000),
+		accessLogCh:   make(chan *api.AccessLog, 10000),
 	}
 
 	go h.run()
 	return h, nil
 }
 
-func (h *eventHub) run() {
+func (h *eventHubKafka) run() {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
-	allLogs := []*AccessLog{}
+	allLogs := []*api.AccessLog{}
 	for {
 		select {
 		case <-h.done:
@@ -76,13 +78,13 @@ func (h *eventHub) run() {
 			allLogs = append(allLogs, accessLog)
 		case <-ticker.C:
 			h.sendEvent(allLogs)
-			allLogs = []*AccessLog{}
+			allLogs = []*api.AccessLog{}
 			ticker.Reset(5 * time.Second)
 		}
 	}
 }
 
-func (h *eventHub) sendEvent(accessLogs []*AccessLog) {
+func (h *eventHubKafka) sendEvent(accessLogs []*api.AccessLog) {
 	if len(accessLogs) == 0 {
 		return
 	}
@@ -102,14 +104,15 @@ func (h *eventHub) sendEvent(accessLogs []*AccessLog) {
 	}
 }
 
-func (h *eventHub) Send(accessLog *AccessLog) {
+func (h *eventHubKafka) Send(accessLog *api.AccessLog) error {
 	select {
 	case h.accessLogCh <- accessLog:
+		return nil
 	default:
-		logrus.Error("event hub is full")
+		return fmt.Errorf("access log channel is full")
 	}
 }
 
-func (h *eventHub) Close() {
+func (h *eventHubKafka) Close() {
 	close(h.done)
 }
