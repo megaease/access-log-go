@@ -2,7 +2,7 @@ package accesslog
 
 import (
 	"megaease/access-log-go/accesslog/api"
-	"time"
+	"megaease/access-log-go/accesslog/utils/fasttime"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -16,12 +16,12 @@ func (m *AccessLogMiddleware) GetGinMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		start := time.Now()
+		start := fasttime.Now()
 		c.Next()
 
 		log := api.NewAccessLog(m.serviceName)
 		log.SetRequest(c.Request, c.FullPath(), c.ClientIP())
-		log.SetResponse(c.Writer.Status(), int64(c.Writer.Size()), time.Since(start).Milliseconds())
+		log.SetResponse(c.Writer.Status(), int64(c.Writer.Size()), fasttime.Since(start).Milliseconds())
 
 		err := m.backend.Send(log)
 		if err != nil {
