@@ -46,7 +46,7 @@ func New(config *Config) (EventHub, error) {
 	case EventHubTypeKafka:
 		return newKafka(config)
 	case EventHubTypeMock:
-		return newEventHubMock()
+		return &EventHubMock{}, nil
 	}
 	return nil, fmt.Errorf("unsupported event hub type: %s", config.Type)
 }
