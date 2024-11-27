@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetEchoMiddleWare returns the Echo middleware for access log.
 func (m *AccessLogMiddleware) GetEchoMiddleWare() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
@@ -17,8 +18,7 @@ func (m *AccessLogMiddleware) GetEchoMiddleWare() echo.MiddlewareFunc {
 			start := time.Now()
 			err := next(ctx)
 
-			log := api.NewAccessLog()
-			log.SetService(m.serviceName, m.hostname, "")
+			log := api.NewAccessLog(m.serviceName)
 			log.SetRequest(ctx.Request(), ctx.Path(), ctx.RealIP())
 			log.SetResponse(ctx.Response().Status, ctx.Response().Size, time.Since(start).Milliseconds())
 			m.backend.Send(log)

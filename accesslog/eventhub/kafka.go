@@ -11,11 +11,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	topicAccessLog = ""
-)
-
 type (
+	// eventHubKafka is the Kafka event hub.
 	eventHubKafka struct {
 		config        *Config
 		kafkaProducer sarama.SyncProducer
@@ -25,7 +22,7 @@ type (
 	}
 )
 
-// New creates a new EventHub.
+// newKafka creates a new Kafka event hub.
 func newKafka(config *Config) (EventHub, error) {
 	conf := config.Kafka
 	tlsConfig, err := utils.LoadTLSConfig("", conf.Certfile, conf.Keyfile)
@@ -64,9 +61,11 @@ func newKafka(config *Config) (EventHub, error) {
 	return h, nil
 }
 
+// run runs the Kafka event hub.
 func (h *eventHubKafka) run() {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
+	defer h.kafkaProducer.Close()
 
 	allLogs := []*api.AccessLog{}
 	for {
@@ -84,18 +83,19 @@ func (h *eventHubKafka) run() {
 	}
 }
 
+// sendEvent sends the access logs to Kafka.
 func (h *eventHubKafka) sendEvent(accessLogs []*api.AccessLog) {
 	if len(accessLogs) == 0 {
 		return
 	}
 	buff, err := json.Marshal(accessLogs)
 	if err != nil {
-		logrus.Errorf("marshal %s %#v to json failed: %v", topicAccessLog, accessLogs, err)
+		logrus.Errorf("marshal %s %#v to json failed: %v", h.config.Kafka.Topic, accessLogs, err)
 		return
 	}
 
 	kafkaMsg := &sarama.ProducerMessage{
-		Topic: topicAccessLog,
+		Topic: h.config.Kafka.Topic,
 		Value: sarama.ByteEncoder(buff),
 	}
 
@@ -104,6 +104,7 @@ func (h *eventHubKafka) sendEvent(accessLogs []*api.AccessLog) {
 	}
 }
 
+// Send sends the access log to Kafka.
 func (h *eventHubKafka) Send(accessLog *api.AccessLog) error {
 	select {
 	case h.accessLogCh <- accessLog:
@@ -113,6 +114,7 @@ func (h *eventHubKafka) Send(accessLog *api.AccessLog) error {
 	}
 }
 
+// Close closes the Kafka event hub.
 func (h *eventHubKafka) Close() {
 	close(h.done)
 }

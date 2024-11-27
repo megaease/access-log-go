@@ -3,13 +3,12 @@ package accesslog
 import (
 	"megaease/access-log-go/accesslog/eventhub"
 	"net/http"
-	"os"
-
-	"github.com/sirupsen/logrus"
 )
 
 type (
+	// Config is the configuration of access log middleware.
 	Config struct {
+		// Backend is the configuration of event hub.
 		Backend eventhub.Config
 
 		// ServiceName is the name of the service.
@@ -21,8 +20,8 @@ type (
 		Skipper func(req *http.Request) bool
 	}
 
+	// AccessLogMiddleware is the middleware of access log.
 	AccessLogMiddleware struct {
-		hostname    string
 		serviceName string
 
 		backend eventhub.EventHub
@@ -31,6 +30,7 @@ type (
 	}
 )
 
+// New creates a new AccessLogMiddleware.
 func New(config *Config) (*AccessLogMiddleware, error) {
 	backend, err := eventhub.New(&config.Backend)
 	if err != nil {
@@ -46,15 +46,8 @@ func New(config *Config) (*AccessLogMiddleware, error) {
 		}
 	}
 
-	hostname, err := os.Hostname()
-	if err != nil {
-		logrus.Errorf("get hostname failed: %v", err)
-		hostname = "unknown"
-	}
-
 	middleware := &AccessLogMiddleware{
 		serviceName: config.ServiceName,
-		hostname:    hostname,
 
 		backend: backend,
 		skip:    skip,
@@ -63,10 +56,12 @@ func New(config *Config) (*AccessLogMiddleware, error) {
 	return middleware, nil
 }
 
+// Close closes the AccessLogMiddleware.
 func (m *AccessLogMiddleware) Close() {
 	m.backend.Close()
 }
 
+// checkSkip checks if the request should be skipped.
 func (m *AccessLogMiddleware) checkSkip(req *http.Request) bool {
 	if _, ok := m.skip[req.URL.Path]; ok || (m.skipper != nil && m.skipper(req)) {
 		return true
