@@ -3,7 +3,7 @@ package eventhub
 import "megaease/access-log-go/accesslog/api"
 
 type (
-	// eventHubMock is the mock event hub.
+	// EventHubMock is the mock event hub.
 	EventHubMock struct {
 		Logs []*api.AccessLog
 	}

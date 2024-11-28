@@ -1,4 +1,4 @@
-module megaease/access-log-go
+module github.com/megaease/access-log-go
 
 go 1.22
 
