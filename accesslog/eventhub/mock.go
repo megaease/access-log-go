@@ -1,6 +1,6 @@
 package eventhub
 
-import "megaease/access-log-go/accesslog/api"
+import "github.com/megaease/access-log-go/accesslog/api"
 
 type (
 	// EventHubMock is the mock event hub.

@@ -1,8 +1,8 @@
 package accesslog
 
 import (
-	"megaease/access-log-go/accesslog/api"
-	"megaease/access-log-go/accesslog/utils/fasttime"
+	"github.com/megaease/access-log-go/accesslog/api"
+	"github.com/megaease/access-log-go/accesslog/utils/fasttime"
 
 	"github.com/labstack/echo/v4"
 )

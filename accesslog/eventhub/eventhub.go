@@ -2,7 +2,8 @@ package eventhub
 
 import (
 	"fmt"
-	"megaease/access-log-go/accesslog/api"
+
+	"github.com/megaease/access-log-go/accesslog/api"
 )
 
 // EventHubType is the type of event hub.

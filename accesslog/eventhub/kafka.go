@@ -3,9 +3,10 @@ package eventhub
 import (
 	"encoding/json"
 	"fmt"
-	"megaease/access-log-go/accesslog/api"
-	"megaease/access-log-go/accesslog/utils"
 	"time"
+
+	"github.com/megaease/access-log-go/accesslog/api"
+	"github.com/megaease/access-log-go/accesslog/utils"
 
 	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"

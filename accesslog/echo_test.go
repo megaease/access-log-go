@@ -1,11 +1,12 @@
 package accesslog
 
 import (
-	"megaease/access-log-go/accesslog/api"
-	"megaease/access-log-go/accesslog/eventhub"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/megaease/access-log-go/accesslog/api"
+	"github.com/megaease/access-log-go/accesslog/eventhub"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"

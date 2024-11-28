@@ -2,8 +2,9 @@ package accesslog
 
 import (
 	"fmt"
-	"megaease/access-log-go/accesslog/eventhub"
 	"net/http"
+
+	"github.com/megaease/access-log-go/accesslog/eventhub"
 )
 
 type (
