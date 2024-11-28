@@ -50,12 +50,12 @@ func NewAccessLog(service string, hostName string) *AccessLog {
 }
 
 // SetRequest sets the request information.
-func (a *AccessLog) SetRequest(req *http.Request, matchURL, clientIP string) {
+func (a *AccessLog) SetRequest(req *http.Request, matchURL, clientIP string, hostIP string) {
 	a.URL = req.URL.Path
 	a.MatchURL = matchURL
 	a.ClientIP = clientIP
 	a.Method = req.Method
-	a.HostIpv4 = req.Host
+	a.HostIpv4 = hostIP
 
 	a.Headers = make(map[string]string)
 	for k, v := range req.Header.Clone() {

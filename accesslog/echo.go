@@ -11,6 +11,9 @@ import (
 func (m *AccessLogMiddleware) GetEchoMiddleWare() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
+			if m.hostIP == "" {
+				m.setHostIP(ctx.Request())
+			}
 			if m.checkSkip(ctx.Request()) {
 				return next(ctx)
 			}
@@ -19,7 +22,7 @@ func (m *AccessLogMiddleware) GetEchoMiddleWare() echo.MiddlewareFunc {
 			err := next(ctx)
 
 			log := api.NewAccessLog(m.serviceName, m.hostName)
-			log.SetRequest(ctx.Request(), ctx.Path(), ctx.RealIP())
+			log.SetRequest(ctx.Request(), ctx.Path(), ctx.RealIP(), m.hostIP)
 			log.SetResponse(ctx.Response().Status, ctx.Response().Size, fasttime.Since(start).Milliseconds())
 			m.backend.Send(log)
 			return err

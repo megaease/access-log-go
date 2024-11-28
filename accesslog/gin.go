@@ -11,6 +11,9 @@ import (
 // GetGinMiddleware returns the Gin middleware for access log.
 func (m *AccessLogMiddleware) GetGinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if m.hostIP == "" {
+			m.setHostIP(c.Request)
+		}
 		if m.checkSkip(c.Request) {
 			c.Next()
 			return
@@ -20,7 +23,7 @@ func (m *AccessLogMiddleware) GetGinMiddleware() gin.HandlerFunc {
 		c.Next()
 
 		log := api.NewAccessLog(m.serviceName, m.hostName)
-		log.SetRequest(c.Request, c.FullPath(), c.ClientIP())
+		log.SetRequest(c.Request, c.FullPath(), c.ClientIP(), m.hostIP)
 		log.SetResponse(c.Writer.Status(), int64(c.Writer.Size()), fasttime.Since(start).Milliseconds())
 
 		err := m.backend.Send(log)
