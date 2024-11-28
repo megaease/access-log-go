@@ -18,6 +18,7 @@ func TestEchoAccessLogMiddleware(t *testing.T) {
 			Type: eventhub.EventHubTypeMock,
 		},
 		ServiceName: "test",
+		HostName:    "test-host",
 		SkipPaths:   []string{"/healthz"},
 	}
 	middleware, err := New(config)
@@ -62,6 +63,7 @@ func TestEchoAccessLogMiddleware(t *testing.T) {
 		Headers:      map[string]string{},
 		StatusCode:   "200",
 		ResponseSize: 11,
+		HostName:     "test-host",
 	}
 	assert.Equal(t, expectedLog.Category, logEntry.Category)
 	assert.Equal(t, expectedLog.System, logEntry.System)
@@ -73,4 +75,5 @@ func TestEchoAccessLogMiddleware(t *testing.T) {
 	assert.Equal(t, expectedLog.Headers, logEntry.Headers)
 	assert.Equal(t, expectedLog.StatusCode, logEntry.StatusCode)
 	assert.Equal(t, expectedLog.ResponseSize, logEntry.ResponseSize)
+	assert.Equal(t, expectedLog.HostName, logEntry.HostName)
 }

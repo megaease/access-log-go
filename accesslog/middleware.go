@@ -1,6 +1,7 @@
 package accesslog
 
 import (
+	"fmt"
 	"megaease/access-log-go/accesslog/eventhub"
 	"net/http"
 )
@@ -13,6 +14,8 @@ type (
 
 		// ServiceName is the name of the service.
 		ServiceName string
+		// HostName is the host name of the service. Optional.
+		HostName string
 
 		// SkipPaths is an url path array which logs are not written. Optional.
 		SkipPaths []string
@@ -23,6 +26,7 @@ type (
 	// AccessLogMiddleware is the middleware of access log.
 	AccessLogMiddleware struct {
 		serviceName string
+		hostName    string
 
 		backend eventhub.EventHub
 		skip    map[string]struct{}
@@ -30,8 +34,22 @@ type (
 	}
 )
 
+func (c *Config) validate() error {
+	if c.ServiceName == "" {
+		return fmt.Errorf("serviceName is required")
+	}
+	if c.HostName == "" {
+		return fmt.Errorf("hostName is required")
+	}
+	return nil
+}
+
 // New creates a new AccessLogMiddleware.
 func New(config *Config) (*AccessLogMiddleware, error) {
+	if err := config.validate(); err != nil {
+		return nil, err
+	}
+
 	backend, err := eventhub.New(&config.Backend)
 	if err != nil {
 		return nil, err
@@ -48,6 +66,7 @@ func New(config *Config) (*AccessLogMiddleware, error) {
 
 	middleware := &AccessLogMiddleware{
 		serviceName: config.ServiceName,
+		hostName:    config.HostName,
 
 		backend: backend,
 		skip:    skip,

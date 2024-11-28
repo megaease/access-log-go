@@ -21,9 +21,9 @@ type AccessLog struct {
 	Type      string `json:"type"`      // value: "access-log"
 	Timestamp int64  `json:"timestamp"` // Milliseconds
 	Service   string `json:"service"`   // Service name
+	HostName  string `json:"hostName"`  // HostName of the server
 
 	// Request values
-	HostName string            `json:"hostName"` // HostName of the server
 	HostIpv4 string            `json:"hostIpv4"` // IPv4 address of the server
 	URL      string            `json:"url"`      // Requested URL
 	MatchURL string            `json:"matchUrl"` // Matched URL pattern
@@ -38,12 +38,13 @@ type AccessLog struct {
 }
 
 // NewAccessLog creates a new AccessLog instance.
-func NewAccessLog(service string) *AccessLog {
+func NewAccessLog(service string, hostName string) *AccessLog {
 	return &AccessLog{
 		Category:  "application",
 		System:    "gpu-runtime",
 		Type:      "access-log",
 		Service:   service,
+		HostName:  hostName,
 		Timestamp: time.Now().UnixMilli(),
 	}
 }
@@ -54,8 +55,7 @@ func (a *AccessLog) SetRequest(req *http.Request, matchURL, clientIP string) {
 	a.MatchURL = matchURL
 	a.ClientIP = clientIP
 	a.Method = req.Method
-	a.HostName = req.Host
-	a.HostIpv4 = req.RemoteAddr
+	a.HostIpv4 = req.Host
 
 	a.Headers = make(map[string]string)
 	for k, v := range req.Header.Clone() {
