@@ -21,7 +21,7 @@ func (m *AccessLogMiddleware) GetEchoMiddleWare() echo.MiddlewareFunc {
 			start := fasttime.Now()
 			err := next(ctx)
 
-			log := api.NewAccessLog(m.serviceName, m.hostName)
+			log := api.NewAccessLog(m.serviceName, m.hostName, m.tenantID)
 			log.SetRequest(ctx.Request(), ctx.Path(), ctx.RealIP(), m.hostIP)
 			log.SetResponse(ctx.Response().Status, ctx.Response().Size, fasttime.Since(start).Milliseconds())
 			m.backend.Send(log)

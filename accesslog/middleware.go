@@ -22,6 +22,8 @@ type (
 		HostName string
 		// HostIP is the ip of host machine. Optional. If not set, it will use host from request.
 		HostIP string
+		// TenantID is the tenant id of the service. Optional. Default is 1.
+		TenantID string
 
 		// SkipPaths is an url path array which logs are not written. Optional.
 		SkipPaths []string
@@ -33,6 +35,7 @@ type (
 	AccessLogMiddleware struct {
 		serviceName string
 		hostName    string
+		tenantID    string
 		hostIP      string
 
 		backend eventhub.EventHub
@@ -47,6 +50,9 @@ func (c *Config) validate() error {
 	}
 	if c.HostName == "" {
 		return fmt.Errorf("hostName is required")
+	}
+	if c.TenantID == "" {
+		c.TenantID = "1"
 	}
 	return nil
 }
@@ -75,6 +81,7 @@ func New(config *Config) (*AccessLogMiddleware, error) {
 		serviceName: config.ServiceName,
 		hostName:    config.HostName,
 		hostIP:      config.HostIP,
+		tenantID:    config.TenantID,
 
 		backend: backend,
 		skip:    skip,

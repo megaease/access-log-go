@@ -40,11 +40,12 @@ type AccessLog struct {
 }
 
 // NewAccessLog creates a new AccessLog instance.
-func NewAccessLog(service string, hostName string) *AccessLog {
+func NewAccessLog(service string, hostName string, tenantID string) *AccessLog {
 	return &AccessLog{
 		Category:  "application",
 		System:    "gpu-runtime",
 		Type:      "access-log",
+		TenantID:  tenantID,
 		Service:   service,
 		HostName:  hostName,
 		Timestamp: time.Now().UnixMilli(),

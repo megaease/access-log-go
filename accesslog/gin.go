@@ -22,7 +22,7 @@ func (m *AccessLogMiddleware) GetGinMiddleware() gin.HandlerFunc {
 		start := fasttime.Now()
 		c.Next()
 
-		log := api.NewAccessLog(m.serviceName, m.hostName)
+		log := api.NewAccessLog(m.serviceName, m.hostName, m.tenantID)
 		log.SetRequest(c.Request, c.FullPath(), c.ClientIP(), m.hostIP)
 		log.SetResponse(c.Writer.Status(), int64(c.Writer.Size()), fasttime.Since(start).Milliseconds())
 
