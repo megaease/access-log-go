@@ -1,6 +1,6 @@
 module github.com/megaease/access-log-go
 
-go 1.22
+go 1.21
 
 require (
 	github.com/IBM/sarama v1.43.3
