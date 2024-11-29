@@ -54,8 +54,10 @@ func NewAccessLog(service string, hostName string, tenantID string) *AccessLog {
 
 // SetRequest sets the request information.
 func (a *AccessLog) SetRequest(req *http.Request, matchURL, clientIP string, hostIP string) {
-	a.URL = req.URL.Path
-	a.MatchURL = matchURL
+	// add method to path to make it unique, based on the assumption that the same path can have different methods
+	// this is already used in our log system.
+	a.URL = req.Method + " " + req.URL.Path
+	a.MatchURL = req.Method + " " + matchURL
 	a.ClientIP = clientIP
 	a.Method = req.Method
 	a.HostIpv4 = hostIP
