@@ -5,7 +5,8 @@ import "github.com/megaease/access-log-go/accesslog/api"
 type (
 	// EventHubMock is the mock event hub.
 	EventHubMock struct {
-		Logs []*api.AccessLog
+		Record bool
+		Logs   []*api.AccessLog
 	}
 )
 
@@ -14,7 +15,9 @@ func (m *EventHubMock) Send(log *api.AccessLog) error {
 	if m.Logs == nil {
 		m.Logs = []*api.AccessLog{}
 	}
-	m.Logs = append(m.Logs, log)
+	if m.Record {
+		m.Logs = append(m.Logs, log)
+	}
 	return nil
 }
 

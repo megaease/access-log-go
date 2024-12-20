@@ -26,6 +26,7 @@ func TestEchoAccessLogMiddleware(t *testing.T) {
 	assert.Nil(t, err)
 	defer middleware.Close()
 	mockHub := middleware.backend.(*eventhub.EventHubMock)
+	mockHub.Record = true
 
 	// setup Echo router
 	e := echo.New()
@@ -58,8 +59,8 @@ func TestEchoAccessLogMiddleware(t *testing.T) {
 		System:       "gpu-runtime",
 		Type:         "access-log",
 		Service:      "test",
-		URL:          "/test/123",
-		MatchURL:     "/test/:testid",
+		URL:          "GET /test/123",
+		MatchURL:     "GET /test/:testid",
 		Method:       "GET",
 		Headers:      map[string]string{},
 		StatusCode:   "200",
